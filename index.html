@@ -328,15 +328,12 @@
         const threeDaysAgo = new Date(today);
         threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
         
-        const dashboardOrders = orders.filter(order => {
-          const orderDate = new Date(order.date);
-          const isWithin3Days = orderDate >= threeDaysAgo;
-          const isNotDelivered = order.status !== 'delivered';
-          return isWithin3Days || isNotDelivered;
-        });
+        // Only show pending orders in active orders list
+        const dashboardOrders = orders.filter(order => order.status === 'pending');
         
         const pendingOrders = orders.filter(o => o.status === 'pending').length;
         const deliveredOrders = orders.filter(o => o.status === 'delivered').length;
+        const pickupOrders = orders.filter(o => o.status === 'pickup').length;
         const cancelledOrders = orders.filter(o => o.status === 'cancelled').length;
         
         // Today's sales
