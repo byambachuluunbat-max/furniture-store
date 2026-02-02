@@ -9,7 +9,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <!-- App version - change this to force update -->
-  <meta name="version" content="2.0.2">
+  <meta name="version" content="2.0.3">
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -17,7 +17,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     // Auto-refresh check every 5 minutes
-    const APP_VERSION = '2.0.2';
+    const APP_VERSION = '2.0.3';
     setInterval(() => {
       fetch(window.location.href + '?v=' + Date.now())
         .then(r => r.text())
@@ -104,8 +104,11 @@
     // Google Sheets API URL
     const SHEETS_API = 'https://script.google.com/macros/s/AKfycbypuz5flEviRVfcvmDFtfvlKkfFq8YdrHGSgHocpzmH_6iG7ynIAqFblnmX83EiZOWf6w/exec';
 
+    // Check if driver mode
+    const isDriverMode = window.location.search.includes('driver');
+
     function App() {
-      const [activeTab, setActiveTab] = useState('dashboard');
+      const [activeTab, setActiveTab] = useState(isDriverMode ? 'delivery' : 'dashboard');
       const [showPasswordModal, setShowPasswordModal] = useState(false);
       const [pendingTab, setPendingTab] = useState(null);
       const [unlockedTabs, setUnlockedTabs] = useState({ inventory: false, settings: false });
@@ -1885,36 +1888,44 @@
           </button>
           
           <div className="max-w-lg mx-auto">
-            {activeTab === 'dashboard' && <Dashboard />}
-            {activeTab === 'orders' && <Orders />}
-            {activeTab === 'delivery' && <Delivery />}
-            {activeTab === 'inventory' && <Inventory />}
-            {activeTab === 'settings' && <SettingsPage />}
+            {isDriverMode ? (
+              <Delivery />
+            ) : (
+              <>
+                {activeTab === 'dashboard' && <Dashboard />}
+                {activeTab === 'orders' && <Orders />}
+                {activeTab === 'delivery' && <Delivery />}
+                {activeTab === 'inventory' && <Inventory />}
+                {activeTab === 'settings' && <SettingsPage />}
+              </>
+            )}
           </div>
 
-          {/* Bottom Navigation */}
-          <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg border-t border-slate-700">
-            <div className="max-w-lg mx-auto flex justify-around py-3">
-              {[
-                { id: 'dashboard', icon: '🏠', label: 'Нүүр' },
-                { id: 'orders', icon: '🛒', label: 'Захиалга' },
-                { id: 'delivery', icon: '🚚', label: 'Хүргэлт' },
-                { id: 'inventory', icon: '📦', label: 'Агуулах' },
-                { id: 'settings', icon: '⚙️', label: 'Тохиргоо' }
-              ].map(({ id, icon, label }) => (
-                <button
-                  key={id}
-                  onClick={() => handleTabChange(id)}
-                  className={`flex flex-col items-center py-1 px-3 ${
-                    activeTab === id ? 'text-amber-400' : 'text-slate-400'
-                  }`}
-                >
-                  <span className="text-xl">{icon}</span>
-                  <span className="text-xs mt-1">{label}</span>
-                </button>
-              ))}
+          {/* Bottom Navigation - Hidden in driver mode */}
+          {!isDriverMode && (
+            <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg border-t border-slate-700">
+              <div className="max-w-lg mx-auto flex justify-around py-3">
+                {[
+                  { id: 'dashboard', icon: '🏠', label: 'Нүүр' },
+                  { id: 'orders', icon: '🛒', label: 'Захиалга' },
+                  { id: 'delivery', icon: '🚚', label: 'Хүргэлт' },
+                  { id: 'inventory', icon: '📦', label: 'Агуулах' },
+                  { id: 'settings', icon: '⚙️', label: 'Тохиргоо' }
+                ].map(({ id, icon, label }) => (
+                  <button
+                    key={id}
+                    onClick={() => handleTabChange(id)}
+                    className={`flex flex-col items-center py-1 px-3 ${
+                      activeTab === id ? 'text-amber-400' : 'text-slate-400'
+                    }`}
+                  >
+                    <span className="text-xl">{icon}</span>
+                    <span className="text-xs mt-1">{label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <PasswordModal
             isOpen={showPasswordModal}
